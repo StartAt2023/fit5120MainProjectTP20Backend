@@ -4,9 +4,9 @@ const pool = require('../config/db'); // 引入 PostgreSQL 连接池
 exports.getAllMBTIQuestions = async (req, res) => {
   try {
     const query = `
-      SELECT "order", question, options, type
+      SELECT "question_order", question, options, type
       FROM mbti_quiz
-      ORDER BY "order" ASC;
+      ORDER BY "question_order" ASC;
     `;
     const { rows: questions } = await pool.query(query);
 
