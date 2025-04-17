@@ -1,15 +1,13 @@
 require('dotenv').config({ path: './src/.env' }); 
 const express = require('express'); // Import Express framework
 const cors = require('cors'); // Import CORS middleware
-const connectDB = require('./config/db'); // Import database connection function
 const usageRoutes = require('./routes/screenUsageRoutes'); // Import screen usage routes
 const quizRoutes = require('./routes/quizQuestionRoutes');
 const mbtiQuizRoutes = require('./routes/mbtiQuizRouters');
 
 const app = express(); // Initialize Express application
 
-// Connect to PostgreSQL database
-connectDB();
+
 
 // Middleware to parse JSON request bodies
 app.use(express.json());

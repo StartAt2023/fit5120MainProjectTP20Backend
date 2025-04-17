@@ -1,36 +1,24 @@
 const { Pool } = require('pg');
 
-// Function to connect to PostgreSQL
-const connectDB = async () => {
+// Create a PostgreSQL connection pool
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // 跳过 SSL 校验（根据你的需求调整）
+  },
+});
+
+// Test the connection when the application starts
+(async () => {
   try {
-    // Check if the DATABASE_URL environment variable is defined
-    if (!process.env.DATABASE_URL) {
-      throw new Error('DATABASE_URL is not defined in environment variables');
-    }
-
-    // Create a new PostgreSQL connection pool
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-    });
-
-    // Test the connection
     const client = await pool.connect();
     console.log('✅ PostgreSQL Connected');
-
-    // Release the client back to the pool
     client.release();
-
-    // Return the pool for use in the application
-    return pool;
   } catch (error) {
-    // Log the error message and stack trace if the connection fails
     console.error('❌ PostgreSQL Connection Failed:', error.message);
     console.error(error.stack);
-
-    // Exit the process with a failure code
-    process.exit(1);
+    process.exit(1); // Exit the process if the connection fails
   }
-};
+})();
 
-// Export the connectDB function for use in other parts of the application
-module.exports = connectDB;
+module.exports = pool;
