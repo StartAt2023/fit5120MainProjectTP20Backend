@@ -26,7 +26,7 @@ exports.validateQuizAnswers = async (req, res) => {
 
       const query = `
         SELECT correct_answer AS "correctAnswer"
-        FROM quiz_bank
+        FROM quizbank
         WHERE id = $1;
       `;
       const { rows } = await pool.query(query, [id]);
