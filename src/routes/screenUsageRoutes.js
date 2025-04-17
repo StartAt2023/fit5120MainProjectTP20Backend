@@ -1,10 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { submitScreenUsage } = require('../controllers/screenUsageController');
+const screenUsageController = require('../controllers/screenUsageController');
 
-// Route to handle screen usage data submission
-// POST /api/usage
-router.post('/', submitScreenUsage);
+router.get('/stats', screenUsageController.getScreenUsageStats);
 
-// Export the router to be used in other parts of the application
 module.exports = router;

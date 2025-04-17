@@ -1,40 +1,60 @@
-const pool = require('../config/db'); // 引入 PostgreSQL 连接池
+const pool = require('../config/db'); // PostgreSQL 连接池
 
-// Controller function to handle screen usage data submission
-exports.submitScreenUsage = async (req, res) => {
+exports.getScreenUsageStats = async (req, res) => {
   try {
-    const data = req.body;
+    const { rows } = await pool.query('SELECT * FROM screenusage');
+    const total = rows.length;
 
-    // Validate if the request body is empty
-    if (!data || Object.keys(data).length === 0) {
-      return res.status(400).json({ message: 'Request body is empty or invalid' });
+    if (total === 0) {
+      return res.status(200).json({ message: 'No data found' });
     }
 
-    // Insert the screen usage data into the database
-    const query = `
-      INSERT INTO screen_usage (user_id, screen_time, activity, timestamp)
-      VALUES ($1, $2, $3, $4)
-      RETURNING *;
-    `;
-    const values = [
-      data.user_id,
-      data.screen_time,
-      data.activity,
-      data.timestamp || new Date() // Use current timestamp if not provided
-    ];
+    // 统计函数
+    const countByField = (field) => {
+      const counts = {};
+      for (const row of rows) {
+        const value = row[field];
+        counts[value] = (counts[value] || 0) + 1;
+      }
+      const percentages = {};
+      for (const key in counts) {
+        percentages[key] = ((counts[key] / total) * 100).toFixed(2) + '%';
+      }
+      return percentages;
+    };
 
-    const { rows } = await pool.query(query, values);
+    // 生成返回结果
+    const result = {
+      total_records: total,
+      device_type: countByField('device_type'),
+      screen_time_period: countByField('screen_time_period'),
+      screen_activity: countByField('screen_activity'),
+      app_category: countByField('app_category'),
+      average_screen_time_range: (() => {
+        const ranges = {
+          '0–5': 0,
+          '6–10': 0,
+          '11–15': 0,
+          '16+': 0
+        };
+        for (const row of rows) {
+          const time = row.average_screen_time;
+          if (time <= 5) ranges['0–5']++;
+          else if (time <= 10) ranges['6–10']++;
+          else if (time <= 15) ranges['11–15']++;
+          else ranges['16+']++;
+        }
+        const percentages = {};
+        for (const key in ranges) {
+          percentages[key] = ((ranges[key] / total) * 100).toFixed(2) + '%';
+        }
+        return percentages;
+      })()
+    };
 
-    // Return a success response with the saved data
-    res.status(201).json(rows[0]);
+    res.status(200).json(result);
   } catch (err) {
-    if (err.code === '23505') {
-      // Handle unique constraint violations (if applicable)
-      return res.status(400).json({ message: 'Duplicate entry', error: err.detail });
-    }
-
-    // Log the error and return a 500 Internal Server Error response
-    console.error('Error saving screen usage:', err.message);
+    console.error('Error processing screen usage stats:', err.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
