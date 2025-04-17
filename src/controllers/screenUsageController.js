@@ -1,4 +1,4 @@
-const pool = require('../config/db'); // PostgreSQL 连接池
+const pool = require('../config/db'); 
 
 exports.getScreenUsageStats = async (req, res) => {
   try {
@@ -9,7 +9,7 @@ exports.getScreenUsageStats = async (req, res) => {
       return res.status(200).json({ message: 'No data found' });
     }
 
-    // 统计函数
+ 
     const countByField = (field) => {
       const counts = {};
       for (const row of rows) {
@@ -23,7 +23,7 @@ exports.getScreenUsageStats = async (req, res) => {
       return percentages;
     };
 
-    // 生成返回结果
+
     const result = {
       total_records: total,
       device_type: countByField('device_type'),
