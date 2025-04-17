@@ -1,6 +1,6 @@
-const pool = require('../config/db'); // 引入 PostgreSQL 连接池
+const pool = require('../config/db'); 
 
-// 获取所有问题
+
 exports.getAllMBTIQuestions = async (req, res) => {
   try {
     const query = `
@@ -16,7 +16,7 @@ exports.getAllMBTIQuestions = async (req, res) => {
   }
 };
 
-// 校验答案
+
 exports.validateAnswers = async (req, res) => {
   try {
     const answers = req.body;

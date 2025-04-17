@@ -18,22 +18,22 @@ exports.getAllQuizQuestions = async (req, res) => {
 // 校验测验答案
 exports.validateQuizAnswers = async (req, res) => {
   try {
-    const answers = req.body;
+    const answers = req.body; // 从请求体中获取答案数组
     const results = [];
 
     for (const answer of answers) {
-      const { id, selectedOption } = answer;
+      const { question, selectedOption } = answer; // 使用 question 而不是 id
 
       const query = `
-        SELECT correctanswer
+        SELECT correctanswer AS "correctAnswer"
         FROM quizbank
-        WHERE id = $1;
+        WHERE question = $1;
       `;
-      const { rows } = await pool.query(query, [id]);
+      const { rows } = await pool.query(query, [question]); // 使用 question 作为查询条件
 
       if (rows.length === 0) {
         results.push({
-          id,
+          question,
           selectedOption,
           correctAnswer: null,
           isCorrect: false,
@@ -42,18 +42,17 @@ exports.validateQuizAnswers = async (req, res) => {
         continue;
       }
 
-      const question = rows[0];
-      const isCorrect = question.correctAnswer === selectedOption;
+      const questionData = rows[0];
+      const isCorrect = questionData.correctAnswer === selectedOption;
 
       results.push({
-        id,
+        question,
         selectedOption,
-        correctAnswer: question.correctAnswer,
+        correctAnswer: questionData.correctAnswer,
         isCorrect,
       });
     }
 
-    console.log(results);
     res.status(200).json(results);
   } catch (err) {
     res.status(500).json({ message: 'Failed to validate quiz answers', error: err.message });
