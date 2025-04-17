@@ -4,8 +4,8 @@ const pool = require('../config/db'); // 引入 PostgreSQL 连接池
 exports.getAllQuizQuestions = async (req, res) => {
   try {
     const query = `
-      SELECT id, question, options, correct_answer AS "correctAnswer"
-      FROM quiz_bank;
+      SELECT section, question, options, correctanswer,quiztype
+      FROM quizbank;
     `;
     const { rows: questions } = await pool.query(query);
 
@@ -25,7 +25,7 @@ exports.validateQuizAnswers = async (req, res) => {
       const { id, selectedOption } = answer;
 
       const query = `
-        SELECT correct_answer AS "correctAnswer"
+        SELECT correctanswer
         FROM quizbank
         WHERE id = $1;
       `;

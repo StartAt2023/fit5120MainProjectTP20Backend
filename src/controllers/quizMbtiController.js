@@ -23,17 +23,17 @@ exports.validateAnswers = async (req, res) => {
     const results = [];
 
     for (const answer of answers) {
-      const { option, order } = answer;
+      const { option, question_order } = answer;
 
       const query = `
         SELECT correct_answer, explanation
         FROM mbti_quiz
-        WHERE "order" = $1;
+        WHERE "question_order" = $1;
       `;
-      const { rows } = await pool.query(query, [order]);
+      const { rows } = await pool.query(query, [question_order]);
 
       if (rows.length === 0) {
-        results.push({ order, message: 'Question not found' });
+        results.push({ question_order, message: 'Question not found' });
         continue;
       }
 
@@ -41,7 +41,7 @@ exports.validateAnswers = async (req, res) => {
 
       if (!question.correct_answer) {
         results.push({
-          order,
+          question_order,
           isCorrect: null,
           explanation: "This question is for data collection purposes only.",
           correctAnswer: null
@@ -52,7 +52,7 @@ exports.validateAnswers = async (req, res) => {
       const isCorrect = question.correct_answer === option;
 
       results.push({
-        order,
+        question_order,
         isCorrect,
         explanation: question.explanation,
         correctAnswer: question.correct_answer
