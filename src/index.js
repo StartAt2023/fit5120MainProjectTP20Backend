@@ -4,9 +4,9 @@ const cors = require('cors'); // Import CORS middleware
 const usageRoutes = require('./routes/screenUsageRoutes'); // Import screen usage routes
 const quizRoutes = require('./routes/quizQuestionRoutes');
 const mbtiQuizRoutes = require('./routes/mbtiQuizRouters');
+const aiRoutes = require('./routes/AIRouters'); 
 
 const app = express(); // Initialize Express application
-
 
 
 // Middleware to parse JSON request bodies
@@ -20,7 +20,7 @@ app.use(cors());
 app.use('/api/usage', usageRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/mbtiquiz', mbtiQuizRoutes);
-
+app.use('/api/ai', aiRoutes);
 // Handle 404 errors for undefined routes
 app.use((req, res, next) => {
   res.status(404).json({ message: 'Route not found' });
