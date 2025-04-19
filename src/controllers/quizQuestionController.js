@@ -1,10 +1,11 @@
-const pool = require('../config/db'); 
-
+const pool = require('../config/db');
+const axios = require('axios');
+require('dotenv').config();
 
 exports.getAllQuizQuestions = async (req, res) => {
   try {
     const query = `
-      SELECT section, question, options, correctanswer,quiztype
+      SELECT section, question, options, correctanswer, quiztype
       FROM quizbank;
     `;
     const { rows: questions } = await pool.query(query);
@@ -37,6 +38,7 @@ exports.validateQuizAnswers = async (req, res) => {
           correctAnswer: null,
           isCorrect: false,
           message: 'Question not found',
+          explanation: 'No explanation available because the question was not found.'
         });
         continue;
       }
@@ -44,11 +46,48 @@ exports.validateQuizAnswers = async (req, res) => {
       const questionData = rows[0];
       const isCorrect = questionData.correctAnswer === selectedOption;
 
+      let explanation = '';
+      const prompt = `
+The user was given the following multiple-choice quiz question:
+
+Question: ${question}
+User selected: ${selectedOption}
+Correct answer: ${questionData.correctAnswer}
+
+Please explain why the user's answer is ${isCorrect ? 'correct' : 'incorrect'}, and provide a short explanation in no more than 20 words.`;
+
+      try {
+        const response = await axios.post(
+          'https://openrouter.ai/api/v1/chat/completions',
+          {
+            model: 'mistralai/mistral-small-3.1-24b-instruct:free',
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ]
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            timeout: 15000
+          }
+        );
+        explanation = response.data.choices[0].message.content;
+      } catch (error) {
+        console.error('AI explanation error:', error.response?.data || error.message);
+        explanation = 'Unable to generate explanation due to AI service error.';
+      }
+
       results.push({
         question,
         selectedOption,
         correctAnswer: questionData.correctAnswer,
         isCorrect,
+        explanation
       });
     }
 
