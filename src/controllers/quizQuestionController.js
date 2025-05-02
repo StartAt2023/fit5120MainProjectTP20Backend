@@ -18,18 +18,24 @@ exports.getAllQuizQuestions = async (req, res) => {
 
 exports.validateQuizAnswers = async (req, res) => {
   try {
-    const answers = req.body; 
+    let answers = req.body;
+
+    // 支持单个对象格式
+    if (!Array.isArray(answers)) {
+      answers = [answers];
+    }
+
     const results = [];
 
     for (const answer of answers) {
-      const { question, selectedOption } = answer; 
+      const { question, selectedOption } = answer;
 
       const query = `
         SELECT correctanswer AS "correctAnswer"
         FROM quizbank
         WHERE question = $1;
       `;
-      const { rows } = await pool.query(query, [question]); 
+      const { rows } = await pool.query(query, [question]);
 
       if (rows.length === 0) {
         results.push({
@@ -46,27 +52,24 @@ exports.validateQuizAnswers = async (req, res) => {
       const questionData = rows[0];
       const isCorrect = questionData.correctAnswer === selectedOption;
 
-      let explanation = '';
       const prompt = `
-The user was given the following multiple-choice quiz question:
+        The user was given the following multiple-choice quiz question:
 
-Question: ${question}
-User selected: ${selectedOption}
-Correct answer: ${questionData.correctAnswer}
+        Question: ${question}
+        User selected: ${selectedOption}
+        Correct answer: ${questionData.correctAnswer}
 
-Please explain why the user's answer is ${isCorrect ? 'correct' : 'incorrect'}, and provide a short explanation in no more than 20 words.`;
+        Please explain why the user's answer is ${isCorrect ? 'correct' : 'incorrect'}, and provide a short explanation in no more than 20 words.
+      `;
+
+      let explanation = '';
 
       try {
         const response = await axios.post(
           'https://openrouter.ai/api/v1/chat/completions',
           {
             model: 'mistralai/mistral-small-3.1-24b-instruct:free',
-            messages: [
-              {
-                role: 'user',
-                content: prompt
-              }
-            ]
+            messages: [{ role: 'user', content: prompt }]
           },
           {
             headers: {
@@ -76,9 +79,20 @@ Please explain why the user's answer is ${isCorrect ? 'correct' : 'incorrect'}, 
             timeout: 15000
           }
         );
-        explanation = response.data.choices[0].message.content;
+
+        // 打印完整响应（调试用）
+        console.log("🟢 AI raw response:", JSON.stringify(response.data, null, 2));
+
+        // 容错处理不同格式的 AI 返回结构
+        explanation = response.data.choices?.[0]?.message?.content
+                   || response.data.choices?.[0]?.text
+                   || 'No explanation returned from AI.';
       } catch (error) {
-        console.error('AI explanation error:', error.response?.data || error.message);
+        console.error('❌ AI explanation error:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
         explanation = 'Unable to generate explanation due to AI service error.';
       }
 
@@ -93,6 +107,9 @@ Please explain why the user's answer is ${isCorrect ? 'correct' : 'incorrect'}, 
 
     res.status(200).json(results);
   } catch (err) {
-    res.status(500).json({ message: 'Failed to validate quiz answers', error: err.message });
+    res.status(500).json({
+      message: 'Failed to validate quiz answers',
+      error: err.message
+    });
   }
 };
