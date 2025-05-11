@@ -1,4 +1,4 @@
-const pool = require('../config/db'); // 引入 PostgreSQL 连接池
+const pool = require('../config/db'); 
 
 exports.getAllComments = async (req, res) => {
   try {
