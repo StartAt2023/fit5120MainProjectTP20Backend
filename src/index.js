@@ -7,6 +7,7 @@ const quizRoutes = require('./routes/quizQuestionRoutes');
 const mbtiQuizRoutes = require('./routes/mbtiQuizRouters');
 const commentRoutes = require('./routes/commentListRouters'); 
 const cyberSecurityRoutes = require('./routes/cyberSecurityRouters'); 
+const studentFocusRoutes = require('./routes/studentFocusRouters');
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use('/api/quiz', quizRoutes);
 app.use('/api/mbtiquiz', mbtiQuizRoutes);
 app.use('/api/comments', commentRoutes); 
 app.use('/api/cybersecurity', cyberSecurityRoutes); 
+app.use('/api/studentfocus', studentFocusRoutes);
 
 // Handle 404 errors for undefined routes
 app.use((req, res, next) => {
