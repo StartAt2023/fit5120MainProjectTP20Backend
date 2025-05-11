@@ -5,7 +5,8 @@ const cors = require('cors');
 const usageRoutes = require('./routes/screenUsageRoutes');
 const quizRoutes = require('./routes/quizQuestionRoutes');
 const mbtiQuizRoutes = require('./routes/mbtiQuizRouters');
-const commentRoutes = require('./routes/commentListRouters'); // ✨ 新增：引入评论routes
+const commentRoutes = require('./routes/commentListRouters'); 
+const cyberSecurityRoutes = require('./routes/cyberSecurityRouters'); 
 
 const app = express();
 
@@ -19,7 +20,8 @@ app.use(cors());
 app.use('/api/usage', usageRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/mbtiquiz', mbtiQuizRoutes);
-app.use('/api/comments', commentRoutes); // ✨ 新增：评论接口，挂在 /api/comments
+app.use('/api/comments', commentRoutes); 
+app.use('/api/cybersecurity', cyberSecurityRoutes); 
 
 // Handle 404 errors for undefined routes
 app.use((req, res, next) => {
