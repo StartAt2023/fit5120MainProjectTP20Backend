@@ -34,7 +34,6 @@ exports.validateAnswers = async (req, res) => {
     for (const answer of answers) {
       const { option, question_order } = answer;
 
-      // 收集前5题数据
       if (question_order >= 1 && question_order <= 5) {
         switch (question_order) {
           case 1:
