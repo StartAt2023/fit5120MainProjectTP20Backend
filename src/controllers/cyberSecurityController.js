@@ -1,15 +1,19 @@
 const pool = require('../config/db'); 
 
-exports.getAllComments = async (req, res) => {
+exports.getCyberData = async (req, res) => {
   try {
     const query = `
-      SELECT *
-      FROM cybersecurity_data;
+      SELECT 
+        attack_type,
+        ROUND(SUM(data_compromised_GB), 2) AS total_data_compromised_GB
+      FROM cybersecurity_data
+      GROUP BY attack_type
+      ORDER BY total_data_compromised_GB DESC;
     `;
-    const { rows: comments } = await pool.query(query);
 
-    res.status(200).json(comments);
+    const { rows } = await pool.query(query);
+    res.status(200).json(rows);
   } catch (err) {
-    res.status(500).json({ message: 'Failed to retrieve comments', error: err.message });
+    res.status(500).json({ message: 'Failed to retrieve cybersecurity data summary', error: err.message });
   }
 };
