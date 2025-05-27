@@ -21,8 +21,6 @@ exports.validateAnswers = async (req, res) => {
   try {
     const answers = req.body;
     const results = [];
-
-    // 用于 screenusage 插入 & AI 分析
     const usageFields = {
       device_type: null,
       screen_time_period: null,

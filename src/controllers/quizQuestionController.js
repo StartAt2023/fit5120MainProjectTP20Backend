@@ -80,10 +80,9 @@ exports.validateQuizAnswers = async (req, res) => {
           }
         );
 
-        // 打印完整响应（调试用）
+ 
         console.log("🟢 AI raw response:", JSON.stringify(response.data, null, 2));
 
-        // 容错处理不同格式的 AI 返回结构
         explanation = response.data.choices?.[0]?.message?.content
                    || response.data.choices?.[0]?.text
                    || 'No explanation returned from AI.';
