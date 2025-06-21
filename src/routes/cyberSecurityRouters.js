@@ -2,6 +2,6 @@ const express = require('express');
 const router = express.Router();
 const cyberSecurityController = require('../controllers/cyberSecurityController'); 
 
-router.get('/cycberData', cyberSecurityController.getCyberData);
+router.get('/cyberData', cyberSecurityController.getCyberData);
 
 module.exports = router;
