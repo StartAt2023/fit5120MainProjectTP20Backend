@@ -4,7 +4,7 @@ const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false, // 跳过 SSL 校验（根据你的需求调整）
+    rejectUnauthorized: false, // Skip SSL verification (adjust based on your needs)
   },
 });
 
@@ -16,8 +16,10 @@ const pool = new Pool({
     client.release();
   } catch (error) {
     console.error('❌ PostgreSQL Connection Failed:', error.message);
-    console.error(error.stack);
-    process.exit(1); // Exit the process if the connection fails
+    console.error('⚠️  Application will continue without database connection');
+    console.error('   Make sure DATABASE_URL is set correctly in your environment variables');
+    // Don't exit the process, let the application continue
+    // process.exit(1); // Commented out to prevent app crash
   }
 })();
 
